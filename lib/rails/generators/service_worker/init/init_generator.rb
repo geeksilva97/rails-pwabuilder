@@ -2,7 +2,7 @@ require "rails/generators"
 
 module PwaBuilder
   module Generators
-    class InitGenerator < Rails::Generators::Base
+    class InstallGenerator < Rails::Generators::Base
       source_root File.expand_path("templates", __dir__)
 
       def do_something
