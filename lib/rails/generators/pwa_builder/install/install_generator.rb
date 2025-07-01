@@ -5,49 +5,34 @@ module PwaBuilder
     class InstallGenerator < Rails::Generators::Base
       source_root File.expand_path("templates", __dir__)
 
-      def do_something
-        puts 'gotta do something'
+      def copy_workbox_files
+        say "Installing Workbox JavaScript files...", :green
+        directory "workbox", "vendor/javascript/workbox"
       end
 
-      def another_thing
-        puts 'gotta do another thing'
+      def create_service_worker_initializer
+        empty_directory "app/javascript/initializers"
+        copy_file "initializer.js", "app/javascript/initializers/service_worker_initializer.js"
       end
 
-      # def create_config_files
-      #   empty_directory "config/service_worker"
-      #   copy_file "init.js", "config/service_worker/init.js"
-      #   copy_file "precache.js", "config/service_worker/precache.js"
-      #   copy_file "routes.js", "config/service_worker/routes.js"
-      # end
+      def add_initializer_to_import_map
+        append_to_file "config/importmap.rb", <<~RUBY
+          pin "initializers/service_worker_initializer", to: "initializers/service_worker_initializer.js"
+        RUBY
+      end
 
-      # def inject_registration_into_application_js
-      #   js_file = "app/javascript/application.js"
-      #   registration_code = <<-JS
+      def print_guidance
+        say <<~GUIDANCE, :green
 
-# // Service Worker registration added by generator
-# if ('serviceWorker' in navigator) {
-  # window.addEventListener('load', () => {
-    # navigator.serviceWorker.register('/service-worker.js')
-      # .then(reg => {
-      #   console.log("✅ Service Worker registered:", reg);
-      # })
-      # .catch(err => {
-      #   console.error("❌ Service Worker registration failed:", err);
-      # });
-  # });
-# }
-      #   JS
+          Add the following line to your application.js file
 
-      #   if File.exist?(js_file)
-      #     unless File.read(js_file).include?("navigator.serviceWorker.register")
-      #       append_to_file js_file, registration_code
-      #     else
-      #       say_status("skip", "Service Worker registration already present in #{js_file}", :yellow)
-      #     end
-      #   else
-      #     say_status("error", "Could not find #{js_file} to inject Service Worker registration.", :red)
-      #   end
-      # end
+          import { registerServiceWorker } from 'initializers/service_worker_initializer';
+
+          window.addEventListener('load', () => {
+            registerServiceWorker();
+          });
+        GUIDANCE
+      end
     end
   end
 end
