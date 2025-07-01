@@ -31,6 +31,10 @@ module PwaBuilder
           unless content.include?("importScripts('workbox/workbox-sw.js');")
             prepend_to_file service_worker_file, <<~JS
 
+            workbox.setConfig({
+              modulePathPrefix: '/workbox/'
+            });
+
             const { precacheAndRoute } = workbox.precaching;
             const { registerRoute } = workbox.routing;
             const { StaleWhileRevalidate } = workbox.strategies;
